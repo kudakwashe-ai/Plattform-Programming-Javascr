@@ -1,0 +1,12 @@
+{
+  "name": "first-hello-npm-donell",
+  "version": "1.0.0",
+  "description": "My first npm package by Donell Nyapadzauru for Week 4 assignment",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": ["donell", "npm", "assignment", "hello"],
+  "author": "Donell Nyapadzauru",
+  "license": "MIT"
+}
