@@ -1,5 +1,9 @@
-function sayHelloDonell() {
-  return "Hello from Donell Nyapadzauru’s first NPM package for Week 4!";
+function sayHello() {
+  console.log("Hello from Donell’s first NPM package!");
 }
 
-module.exports = sayHelloDonell;
+
+sayHello();
+
+
+module.exports = sayHello;

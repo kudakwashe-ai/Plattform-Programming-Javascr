@@ -1,12 +1,21 @@
 {
   "name": "first-hello-npm-donell",
-  "version": "1.0.0",
-  "description": "My first npm package by Donell Nyapadzauru for Week 4 assignment",
+  "version": "1.0.1",
+  "description": "My first published NPM package — prints a Hello message to the console.",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
-  "keywords": ["donell", "npm", "assignment", "hello"],
-  "author": "Donell Nyapadzauru",
-  "license": "MIT"
+  "keywords": [
+    "hello",
+    "npm",
+    "javascript",
+    "example"
+  ],
+  "author": "Kudakwashe Donell Nyapadzauru",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kudakwashe-ai/Platform-Programming-Javascript"
+  }
 }
