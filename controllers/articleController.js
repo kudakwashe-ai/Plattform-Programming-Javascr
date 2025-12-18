@@ -35,17 +35,7 @@ const updateArticle = async (req, res, next) => {
         const { id } = req.params;
         const { title, content } = req.body;
 
-        const article = await articleService.getArticleById(id);
-        if (!article) {
-            return res.status(404).json({ message: 'Article not found' });
-        }
-
-        // Authorization Check
-        // Authorization Check
-        if (req.user.role !== 'admin' && article.author.id !== req.user.id) {
-            return res.status(403).json({ message: 'Access denied: You can only update your own articles' });
-        }
-
+        // Article is already fetched and authorized by authorizeArticle middleware
         const updatedArticle = await articleService.updateArticle(id, { title, content });
         res.status(200).json({ message: 'Article updated', data: updatedArticle });
     } catch (error) {
@@ -57,17 +47,7 @@ const deleteArticle = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const article = await articleService.getArticleById(id);
-        if (!article) {
-            return res.status(404).json({ message: 'Article not found' });
-        }
-
-        // Authorization Check
-        // Authorization Check
-        if (req.user.role !== 'admin' && article.author.id !== req.user.id) {
-            return res.status(403).json({ message: 'Access denied: You can only delete your own articles' });
-        }
-
+        // Article is already authorized by authorizeArticle middleware
         await articleService.deleteArticle(id);
         res.status(200).json({ message: 'Article deleted' });
     } catch (error) {
