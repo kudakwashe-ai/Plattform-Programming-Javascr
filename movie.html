@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineVault | Modern Movie Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f1014;
+            --bg-card: #18191f;
+            --primary: #e50914;
+            --success: #2ecc71;
+            --accent: #ffdb57;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 16, 20, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        select,
+        input,
+        button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-card);
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input {
+            width: 250px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: 700;
+            border: none;
+        }
+
+        button.search-btn {
+            background: var(--text-main);
+            color: var(--bg-dark);
+        }
+
+        button.search-btn:hover {
+            background: #e0e0e0;
+        }
+
+        button.free-btn {
+            background: var(--success);
+            color: #000;
+        }
+
+        button.free-btn.active {
+            background: #27ae60;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        button.free-btn:hover {
+            background: #27ae60;
+        }
+
+        /* Grid */
+        main {
+            padding: 40px;
+        }
+
+        h2.section-title {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .poster-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2/3;
+        }
+
+        .poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .rating-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            z-index: 2;
+        }
+
+        /* Overlay Buttons */
+        .actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover .actions {
+            opacity: 1;
+        }
+
+        .btn-action {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #000;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .type-tag {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .provider-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .provider-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .provider-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .provider-tag {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .tag-free {
+            background: var(--success);
+            color: #000;
+        }
+
+        .tag-sub {
+            background: #3498db;
+            color: white;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            input,
+            select,
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo" onclick="fetchMovies()"><span>🎬</span> CineVault</div>
+        <div class="controls">
+            <button id="freeBtn" class="free-btn" onclick="toggleFreeMode()">🎁 Free to Watch</button>
+            <select id="genreSelect">
+                <option value="">All Genres</option>
+                <option value="28">Action</option>
+                <option value="35">Comedy</option>
+                <option value="18">Drama</option>
+                <option value="27">Horror</option>
+                <option value="878">Sci-Fi</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search movies...">
+            <button class="search-btn" onclick="fetchMovies()">Search</button>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="section-title" id="pageTitle">Trending Now</h2>
+        <div class="grid" id="movieGrid"></div>
+    </main>
+
+    <!-- Trailer Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content" style="width: 80%; max-width: 900px; background:black;">
+            <span class="close-btn" onclick="closeModal('videoModal')">&times;</span>
+            <div class="video-container">
+                <iframe id="trailerFrame" src="" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Provider Modal -->
+    <div id="providerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('providerModal')">&times;</span>
+            <h3 id="providerTitle">Where to Watch</h3>
+            <div id="providerContainer" class="provider-list">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('movieGrid');
+        const searchInput = document.getElementById('searchInput');
+        const genreSelect = document.getElementById('genreSelect');
+        const pageTitle = document.getElementById('pageTitle');
+        const freeBtn = document.getElementById('freeBtn');
+        const videoModal = document.getElementById('videoModal');
+        const providerModal = document.getElementById('providerModal');
+        const trailerFrame = document.getElementById('trailerFrame');
+
+        let isFreeMode = false;
+
+        fetchMovies();
+
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchMovies() });
+        genreSelect.addEventListener('change', () => fetchMovies());
+
+        window.onclick = function (event) {
+            if (event.target == videoModal) closeModal('videoModal');
+            if (event.target == providerModal) closeModal('providerModal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+            if (id === 'videoModal') trailerFrame.src = "";
+        }
+
+        function toggleFreeMode() {
+            isFreeMode = !isFreeMode;
+            if (isFreeMode) {
+                freeBtn.classList.add('active');
+                freeBtn.innerText = "✖️ Exit Free Mode";
+            } else {
+                freeBtn.classList.remove('active');
+                freeBtn.innerText = "🎁 Free to Watch";
+            }
+            fetchMovies();
+        }
+
+        async function fetchMovies() {
+            // If Free Mode is ON, ignore search/genre, or use them as filters WITHIN free?
+            // For now, let's treat Free Mode as a separate "Top Level" filter.
+            // But let's allow searching WITHIN free mode if needed.
+
+            const query = searchInput.value.trim();
+            const genre = genreSelect.value;
+
+            if (isFreeMode) {
+                pageTitle.innerText = "🎁 Free Movies & TV (Ads Supported)";
+                // Clear search/genre visual reset if strictly separating, 
+                // but keeping them supports "Free Action Movies" which is cool.
+            } else if (query) {
+                pageTitle.innerText = `Results for "${query}"`;
+            } else if (genre) {
+                pageTitle.innerText = `Movies in ${genreSelect.options[genreSelect.selectedIndex].text}`;
+            } else {
+                pageTitle.innerText = "Trending Now";
+            }
+
+            grid.innerHTML = '<p style="color:white; text-align:center; grid-column:1/-1;">Loading awesome content...</p>';
+
+            try {
+                let url = `http://localhost:3000/api/search?`;
+                if (isFreeMode) url += `free=true`;
+
+                // Allow refinement even in free mode
+                if (query) url += `&query=${encodeURIComponent(query)}`;
+                else if (genre) url += `&genre=${genre}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.error) {
+                    grid.innerHTML = `<p style="color:var(--primary); text-align:center; grid-column:1/-1; font-weight:bold;">⚠️ ${data.error}</p>`;
+                    return;
+                }
+
+                if (data.results && data.results.length > 0) {
+                    renderCards(data.results);
+                } else {
+                    grid.innerHTML = '<p style="color:white; text-align:center; grid-column:1/-1;">No results found.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Failed to load.</p>';
+            }
+        }
+
+        function renderCards(movies) {
+            grid.innerHTML = '';
+            movies.forEach(movie => {
+                const title = movie.title || movie.name;
+                const poster = movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : 'https://via.placeholder.com/300x450?text=No+Poster';
+                const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+                const type = movie.media_type === 'tv' ? 'tv' : 'movie';
+
+                let actionButtons = '';
+
+                if (isFreeMode) {
+                    // FREE MODE: Primary action is "Watch FREE"
+                    actionButtons = `
+                        <button class="btn-action btn-success" onclick="checkProviders(${movie.id}, '${type}')">
+                            🎁 Watch FREE
+                        </button>
+                    `;
+                } else {
+                    // STANDARD MODE: Primary action is "Trailer", secondary is "Watch Options"
+                    actionButtons = `
+                        <button class="btn-action btn-primary" onclick="watchTrailer(${movie.id}, '${type}')">
+                            ▶ Trailer
+                        </button>
+                        <button class="btn-action btn-secondary" onclick="checkProviders(${movie.id}, '${type}')">
+                            📺 Options
+                        </button>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="poster-container">
+                        <div class="rating-badge">★ ${rating}</div>
+                        <img src="${poster}" class="poster" alt="${title}" loading="lazy">
+                        <div class="actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">${title}</h3>
+                    </div>
+                `;
+                grid.appendChild(card); // Removed Meta (Year/Type) for cleaner look as per "Section" request
+            });
+        }
+
+        async function watchTrailer(id, type) {
+            trailerFrame.src = "";
+            videoModal.style.display = "flex";
+            try {
+                const res = await fetch(`http://localhost:3000/api/trailer/${id}?type=${type}`);
+                const data = await res.json();
+                if (data.key) trailerFrame.src = `https://www.youtube.com/embed/${data.key}?autoplay=1`;
+                else alert("No trailer available.");
+            } catch (err) { alert("Error loading trailer."); }
+        }
+
+        async function checkProviders(id, type) {
+            providerModal.style.display = "flex";
+            const container = document.getElementById('providerContainer');
+            const title = document.getElementById('providerTitle');
+
+            title.innerText = isFreeMode ? "Watch for Free" : "Where to Watch";
+            container.innerHTML = 'Loading...';
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/providers/${id}?type=${type}`);
+                const data = await res.json();
+
+                container.innerHTML = '';
+
+                const hasFree = data.free && data.free.length > 0;
+                const hasRate = data.flatrate && data.flatrate.length > 0;
+
+                if (!hasFree && !hasRate) {
+                    container.innerHTML = '<p>No streaming info available for US region.</p>';
+                    return;
+                }
+
+                if (hasFree) {
+                    data.free.forEach(p => {
+                        container.innerHTML += `
+                            <button class="provider-row" style="width:100%; border:none; cursor:pointer;" onclick="window.open('${data.link}', '_blank')">
+                                <img src="https://image.tmdb.org/t/p/original${p.logo_path}" class="provider-logo">
+                                <span class="provider-name">${p.provider_name}</span>
+                                <span class="provider-tag tag-free">FREE</span>
+                            </button>`;
+                    });
+                } else if (isFreeMode) {
+                    container.innerHTML = '<p>Oops! This title might not be free anymore.</p>';
+                }
+
+                if (hasRate && !isFreeMode) {
+                    data.flatrate.forEach(p => {
+                        container.innerHTML += `
+                            <button class="provider-row" style="width:100%; border:none; cursor:pointer;" onclick="window.open('${data.link}', '_blank')">
+                                <img src="https://image.tmdb.org/t/p/original${p.logo_path}" class="provider-logo">
+                                <span class="provider-name">${p.provider_name}</span>
+                                <span class="provider-tag tag-sub">SUB</span>
+                            </button>`;
+                    });
+                }
+            } catch (err) {
+                container.innerHTML = '<p>Error loading providers.</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>
