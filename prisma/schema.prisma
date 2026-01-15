@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("USER") // "USER", "ADMIN"
+  createdAt DateTime @default(now())
+  
+  // User Profile Relation
+  profile   UserProfile?
+  
+  applications Application[]
+}
+
+model UserProfile {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  headline  String?
+  location  String?
+  skills    String? // Stored as comma-separated string for simplicity in MVP
+  experience String? // Markdown supported
+  cvPath    String? // Path to stored PDF
+}
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  title       String
+  company     String
+  location    String
+  type        String   // "FULL_TIME", "PART_TIME", "INTERNSHIP"
+  category    String
+  salaryMin   Int?
+  salaryMax   Int?
+  description String
+  requirements String
+  deadline    DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  applications Application[]
+}
+
+model Application {
+  id        Int      @id @default(autoincrement())
+  status    String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  appliedAt DateTime @default(now())
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id])
+
+  @@unique([userId, jobId])
+}

@@ -1,0 +1,76 @@
+<div class="admin-wrapper">
+  <!-- Sidebar (Ideally this should be a partial, simplified here for now) -->
+  <aside class="admin-sidebar">
+    <a href="/admin" class="sidebar-link"><span>Dashboard</span></a>
+    <a href="/admin/jobs" class="sidebar-link"><span>Jobs</span></a>
+    <a href="/admin/applications" class="sidebar-link active"><span>Applicants</span></a>
+    <a href="/admin/users" class="sidebar-link"><span>Users</span></a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="section-header">
+      <h1>All Applications</h1>
+    </div>
+
+    <div class="card">
+      <% if (applications.length> 0) { %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Job Title</th>
+              <th>Applied At</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% applications.forEach(app=> { %>
+              <tr>
+                <td>
+                  <div>
+                    <%= app.user.name %>
+                  </div>
+                  <small style="color: var(--text-muted);">
+                    <%= app.user.email %>
+                  </small>
+                </td>
+                <td>
+                  <%= app.job.title %>
+                </td>
+                <td>
+                  <%= app.appliedAt.toLocaleDateString() %>
+                </td>
+                <td>
+                  <span
+                    class="badge badge-<%= app.status === 'ACCEPTED' ? 'success' : (app.status === 'REJECTED' ? 'danger' : 'warning') %>">
+                    <%= app.status %>
+                  </span>
+                </td>
+                <td>
+                  <form action="/admin/applications/<%= app.id %>/status" method="POST"
+                    style="display: flex; gap: 4px;">
+                    <button type="submit" name="status" value="ACCEPTED" class="btn btn-sm"
+                      style="color: var(--success);" title="Accept">
+                      ✓
+                    </button>
+                    <button type="submit" name="status" value="REJECTED" class="btn btn-sm"
+                      style="color: var(--danger);" title="Reject">
+                      ✕
+                    </button>
+                    <% if (app.user.profile && app.user.profile.cvPath) { %>
+                      <a href="<%= app.user.profile.cvPath %>" target="_blank" class="btn btn-sm"
+                        title="Download CV">📄</a>
+                      <% } %>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
+        <% } else { %>
+          <p>No applications found.</p>
+          <% } %>
+    </div>
+  </main>
+</div>

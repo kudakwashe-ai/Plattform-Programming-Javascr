@@ -1,0 +1,51 @@
+<div class="admin-header">
+    <h1>Manage Jobs</h1>
+    <a href="/admin/jobs/new" class="btn btn-primary">Create New Job</a>
+</div>
+
+<div class="table-responsive">
+    <% if (jobs.length> 0) { %>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% jobs.forEach(job=> { %>
+                    <tr>
+                        <td>
+                            <%= job.title %>
+                        </td>
+                        <td>
+                            <%= job.company %>
+                        </td>
+                        <td>
+                            <% if (job.isActive) { %>
+                                <span class="badge badge-success">Active</span>
+                                <% } else { %>
+                                    <span class="badge badge-secondary">Inactive</span>
+                                    <% } %>
+                        </td>
+                        <td>
+                            <%= job.createdAt.toLocaleDateString() %>
+                        </td>
+                        <td class="actions">
+                            <a href="/admin/jobs/<%= job.id %>/edit" class="btn btn-sm">Edit</a>
+                            <form action="/admin/jobs/<%= job.id %>/delete" method="POST" style="display:inline;"
+                                onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+            <p class="empty-state">No jobs found. Create one to get started.</p>
+            <% } %>
+</div>

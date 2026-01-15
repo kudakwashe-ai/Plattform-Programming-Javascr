@@ -1,0 +1,34 @@
+<header class="main-header">
+    <div class="container header-content">
+        <a href="/" class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            JOBIT
+        </a>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/" class="<%= path === '/' ? 'active' : '' %>">Home</a></li>
+                <li><a href="/jobs" class="<%= path.startsWith('/jobs') ? 'active' : '' %>">Jobs</a></li>
+
+                <% if (user) { %>
+                    <% if (user.role==='ADMIN' ) { %>
+                        <li><a href="/admin" class="<%= path.startsWith('/admin') ? 'active' : '' %>">Admin</a></li>
+                        <% } else { %>
+                            <li><a href="/member/dashboard"
+                                    class="<%= path.startsWith('/member') ? 'active' : '' %>">Dashboard</a></li>
+                            <% } %>
+                                <li><span class="badge badge-secondary" style="margin-left: 10px;">Hi, <%= user.name %>
+                                            </span></li>
+                                <li><a href="/auth/logout" class="btn btn-secondary"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Logout</a></li>
+                                <% } else { %>
+                                    <li><a href="/auth/login">Login</a></li>
+                                    <li><a href="/auth/register" class="btn btn-primary">Sign Up</a></li>
+                                    <% } %>
+            </ul>
+        </nav>
+    </div>
+</header>

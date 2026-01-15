@@ -1,0 +1,48 @@
+<div class="form-container">
+    <h1>Edit Profile</h1>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-danger">
+            <%= error %>
+        </div>
+        <% } %>
+
+            <% if (req.query.message) { %>
+                <div class="alert alert-warning">
+                    <%= req.query.message %>
+                </div>
+                <% } %>
+
+                    <form action="/member/profile/edit" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="headline">Professional Headline</label>
+                            <input type="text" id="headline" name="headline" value="<%= profile.headline || '' %>"
+                                placeholder="e.g. Senior Software Engineer">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="skills">Skills (Comma separated)</label>
+                            <input type="text" id="skills" name="skills" value="<%= profile.skills || '' %>"
+                                placeholder="e.g. JavaScript, React, Node.js">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience">Experience (Markdown supported)</label>
+                            <textarea id="experience" name="experience"
+                                rows="6"><%= profile.experience || '' %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cv">CV / Resume (PDF Only)</label>
+                            <% if (profile.cvPath) { %>
+                                <p>Current CV: <a href="<%= profile.cvPath %>" target="_blank">View CV</a></p>
+                                <% } %>
+                                    <input type="file" id="cv" name="cv" accept="application/pdf">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Profile</button>
+                            <a href="/member/dashboard" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+</div>

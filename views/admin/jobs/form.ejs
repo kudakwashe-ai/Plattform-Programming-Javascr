@@ -1,0 +1,93 @@
+<div class="form-container">
+    <h1>
+        <%= job ? 'Edit Job' : 'Create New Job' %>
+    </h1>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-danger">
+            <%= error %>
+        </div>
+        <% } %>
+
+            <form action="<%= action %>" method="POST">
+                <div class="form-group">
+                    <label for="title">Job Title</label>
+                    <input type="text" id="title" name="title" value="<%= job ? job.title : '' %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <input type="text" id="company" name="company" value="<%= job ? job.company : '' %>" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" value="<%= job ? job.location : '' %>"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="type">Job Type</label>
+                        <select id="type" name="type" required>
+                            <option value="FULL_TIME" <%=(job && job.type==='FULL_TIME' ) ? 'selected' : '' %>>Full Time
+                            </option>
+                            <option value="PART_TIME" <%=(job && job.type==='PART_TIME' ) ? 'selected' : '' %>>Part Time
+                            </option>
+                            <option value="INTERNSHIP" <%=(job && job.type==='INTERNSHIP' ) ? 'selected' : '' %>
+                                >Internship</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" value="<%= job ? job.category : '' %>" required
+                        placeholder="e.g. Engineering, Design">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="salaryMin">Salary Min (Annual)</label>
+                        <input type="number" id="salaryMin" name="salaryMin" value="<%= job ? job.salaryMin : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="salaryMax">Salary Max</label>
+                        <input type="number" id="salaryMax" name="salaryMax" value="<%= job ? job.salaryMax : '' %>">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description (Markdown supported)</label>
+                    <textarea id="description" name="description" rows="5"
+                        required><%= job ? job.description : '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="requirements">Requirements</label>
+                    <textarea id="requirements" name="requirements" rows="5"
+                        required><%= job ? job.requirements : '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline">Application Deadline</label>
+                    <input type="date" id="deadline" name="deadline"
+                        value="<%= job ? new Date(job.deadline).toISOString().split('T')[0] : '' %>" required>
+                </div>
+
+                <% if (job) { %>
+                    <div class="form-group checkbox">
+                        <label>
+                            <input type="checkbox" name="isActive" <%=job.isActive ? 'checked' : '' %>>
+                            Is Active?
+                        </label>
+                    </div>
+                    <% } %>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <%= job ? 'Update Job' : 'Create Job' %>
+                            </button>
+                            <a href="/admin/jobs" class="btn btn-secondary">Cancel</a>
+                        </div>
+            </form>
+</div>

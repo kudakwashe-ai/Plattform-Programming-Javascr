@@ -1,0 +1,117 @@
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <a href="/member/dashboard" class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            JOBFLOW
+        </a>
+        <nav class="nav-links">
+            <a href="/member/dashboard" class="nav-item active">
+                <span>⚡</span> Dashboard
+            </a>
+            <a href="/" class="nav-item">
+                <span>🔍</span> Find Jobs
+            </a>
+            <a href="/member/profile/edit" class="nav-item">
+                <span>👤</span> My Profile
+            </a>
+            <a href="#" class="nav-item">
+                <span>🔖</span> Saved Jobs
+            </a>
+            <a href="#" class="nav-item">
+                <span>⚙️</span> Settings
+            </a>
+        </nav>
+        <div class="user-profile-mini">
+            <div class="avatar">
+                <%= user.name.charAt(0).toUpperCase() %>
+            </div>
+            <div style="font-size: 0.9rem;">
+                <div style="font-weight: 600;">
+                    <%= user.name %>
+                </div>
+                <div style="color: var(--dash-text-muted); font-size: 0.8rem;">Job Seeker</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Top Header -->
+        <header class="dashboard-header">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Search jobs...">
+            </div>
+            <div class="header-actions">
+                <div class="action-icon">🔔</div>
+                <a href="/auth/logout" style="font-size: 0.9rem; font-weight: 600; color: var(--dash-text);">Logout</a>
+            </div>
+        </header>
+
+        <div class="dashboard-content-grid">
+            <div class="main-column" style="grid-column: 1 / -1;">
+
+                <% if (!isProfileComplete) { %>
+                    <div class="dash-card" style="background: #FFFBEB; border-color: #FCD34D;">
+                        <h3 style="color: #92400E;">Complete Your Profile</h3>
+                        <p style="margin-bottom: 1rem;">Upload your CV to start applying for jobs.</p>
+                        <a href="/member/profile/edit" class="btn btn-primary">Upload CV</a>
+                    </div>
+                    <% } %>
+
+                        <h2 style="margin-bottom: 1rem;">My Applications</h2>
+
+                        <div class="dash-card">
+                            <% if (user.applications && user.applications.length> 0) { %>
+                                <div class="table-wrapper">
+                                    <table class="modern-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Job Title</th>
+                                                <th>Company</th>
+                                                <th>Date Applied</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% user.applications.forEach(app=> { %>
+                                                <tr>
+                                                    <td>
+                                                        <a href="/jobs/<%= app.job.id %>"
+                                                            style="font-weight: 600; color: var(--dash-primary);">
+                                                            <%= app.job.title %>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <%= app.job.company %>
+                                                    </td>
+                                                    <td>
+                                                        <%= app.appliedAt.toLocaleDateString() %>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            class="badge badge-<%= app.status === 'ACCEPTED' ? 'success' : (app.status === 'REJECTED' ? 'danger' : 'warning') %>">
+                                                            <%= app.status %>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <% } else { %>
+                                    <div class="text-center" style="padding: 2rem;">
+                                        <p style="color: var(--dash-text-muted); margin-bottom: 1rem;">You haven't
+                                            applied to any jobs yet.</p>
+                                        <a href="/" class="btn btn-primary">Browse Jobs</a>
+                                    </div>
+                                    <% } %>
+                        </div>
+            </div>
+        </div>
+    </main>
+</div>
