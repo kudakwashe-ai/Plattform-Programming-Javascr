@@ -64,3 +64,10 @@ model Application {
 
   @@unique([userId, jobId])
 }
+
+model Siswa {
+  id      Int    @id @default(autoincrement())
+  nama    String
+  umur    Int
+  alamat  String
+}

@@ -43,6 +43,7 @@ app.use('/', require('./routes/api/vacancies')); // Public Job Search
 app.use('/auth', require('./routes/api/auth'));
 app.use('/admin', require('./routes/api/admin'));
 app.use('/member', require('./routes/api/member'));
+app.use('/api/siswa', require('./routes/api/siswa'));
 
 // Redirect /dashboard to /member/dashboard for backward compatibility
 app.get('/dashboard', (req, res) => res.redirect('/member/dashboard'));
