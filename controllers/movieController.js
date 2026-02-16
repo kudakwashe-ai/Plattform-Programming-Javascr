@@ -1,97 +1,107 @@
-const axios = require('axios');
-require('dotenv').config();
+/**
+ * Movie Controller
+ * Handles HTTP requests for movie-related endpoints
+ * Refactored to use movieService for clean separation of concerns
+ */
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const movieService = require('../services/movieService');
+const { asyncHandler } = require('../middleware/authMiddleware');
+const { AppError } = require('../utils/errors');
 
-exports.searchMovies = async (req, res) => {
+/**
+ * @route   GET /api/movies/search
+ * @desc    Search movies/TV shows
+ * @access  Public (optional auth for personalization)
+ */
+exports.searchMovies = asyncHandler(async (req, res) => {
     const query = req.query.query;
     const genre = req.query.genre;
     const isFree = req.query.free === 'true';
+    const page = parseInt(req.query.page) || 1;
 
-    // DEBUGGING LOGS
-    console.log(`DEBUG: Request - Query: "${query}", Genre: "${genre}", Free: ${isFree}`);
+    const results = await movieService.searchMovies({
+        query,
+        genre,
+        isFree,
+        page,
+    });
 
-    try {
-        let apiUrl = `${TMDB_BASE_URL}/trending/all/day`; // Default: Trending
-        let params = { api_key: TMDB_API_KEY };
+    res.json({
+        status: 'success',
+        data: results,
+        // Include user info if authenticated
+        authenticated: !!req.user,
+    });
+});
 
-        if (query) {
-            // Case 1: Search by Text
-            apiUrl = `${TMDB_BASE_URL}/search/multi`;
-            params.query = query;
-        } else if (isFree) {
-            // Case 3: Free Movies (Monetization = Free/Ads)
-            apiUrl = `${TMDB_BASE_URL}/discover/movie`;
-            params.with_watch_monetization_types = 'free|ads';
-            params.watch_region = 'US'; // Required for monetization filters
-            params.sort_by = 'popularity.desc';
-        } else if (genre) {
-            // Case 2: Filter by Genre (Discover)
-            apiUrl = `${TMDB_BASE_URL}/discover/movie`;
-            params.with_genres = genre;
-            params.sort_by = 'popularity.desc';
-        }
-
-        const response = await axios.get(apiUrl, { params });
-        res.json(response.data);
-
-    } catch (error) {
-        console.error('Error fetching data from TMDB:', error.message);
-        if (error.response) {
-            console.error("API details:", JSON.stringify(error.response.data));
-        }
-        res.status(500).json({ error: 'Failed to fetch data from TMDB' });
-    }
-};
-
-exports.getProviders = async (req, res) => {
-    const movieId = req.params.id;
+/**
+ * @route   GET /api/movies/providers/:id
+ * @desc    Get watch providers for a movie/TV show
+ * @access  Public
+ */
+exports.getProviders = asyncHandler(async (req, res) => {
+    const movieId = parseInt(req.params.id);
     const type = req.query.type || 'movie';
 
-    try {
-        const response = await axios.get(`${TMDB_BASE_URL}/${type}/${movieId}/watch/providers`, {
-            params: { api_key: TMDB_API_KEY }
-        });
+    const providers = await movieService.getProviders(movieId, type);
 
-        const data = response.data.results;
-        const usData = data.US || {}; // Default to US for now
+    res.json({
+        status: 'success',
+        data: providers,
+    });
+});
 
-        res.json({
-            link: usData.link,
-            free: usData.free || usData.ads || [],
-            flatrate: usData.flatrate || [],
-            rent: usData.rent || []
-        });
+/**
+ * @route   GET /api/movies/trailer/:id
+ * @desc    Get trailer for a movie/TV show
+ * @access  Public
+ */
+exports.getTrailer = asyncHandler(async (req, res) => {
+    const movieId = parseInt(req.params.id);
+    const type = req.query.type || 'movie';
 
-    } catch (error) {
-        console.error('Error fetching providers:', error.message);
-        res.status(500).json({ error: 'Failed to fetch providers' });
+    const trailer = await movieService.getTrailer(movieId, type);
+
+    if (!trailer) {
+        throw new AppError('No trailer found for this item', 404);
     }
-};
 
-exports.getTrailer = async (req, res) => {
-    const movieId = req.params.id;
-    const type = req.query.type || 'movie'; // 'movie' or 'tv'
+    res.json({
+        status: 'success',
+        data: trailer,
+    });
+});
 
-    try {
-        const response = await axios.get(`${TMDB_BASE_URL}/${type}/${movieId}/videos`, {
-            params: { api_key: TMDB_API_KEY }
-        });
+/**
+ * @route   GET /api/movies/details/:id
+ * @desc    Get movie/TV show details
+ * @access  Public
+ */
+exports.getDetails = asyncHandler(async (req, res) => {
+    const movieId = parseInt(req.params.id);
+    const type = req.query.type || 'movie';
 
-        const videos = response.data.results;
-        // Find the "Trailer" on "YouTube"
-        const trailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer')
-            || videos.find(v => v.site === 'YouTube'); // Fallback to any video
+    const details = await movieService.getMovieDetails(movieId, type);
 
-        if (trailer) {
-            res.json({ key: trailer.key });
-        } else {
-            res.status(404).json({ error: 'No trailer found' });
-        }
+    res.json({
+        status: 'success',
+        data: details,
+    });
+});
 
-    } catch (error) {
-        console.error('Error fetching trailer:', error.message);
-        res.status(500).json({ error: 'Failed to fetch trailer' });
-    }
-};
+/**
+ * @route   GET /api/movies/trending
+ * @desc    Get trending movies/TV shows
+ * @access  Public
+ */
+exports.getTrending = asyncHandler(async (req, res) => {
+    const timeWindow = req.query.timeWindow || 'day';
+
+    const trending = await movieService.getTrending(timeWindow);
+
+    res.json({
+        status: 'success',
+        data: trending,
+    });
+});
+

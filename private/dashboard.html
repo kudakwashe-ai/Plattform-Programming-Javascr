@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | CineVault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0b0f;
+            --bg-card: #16171d;
+            --primary: #e50914;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --gradient-primary: linear-gradient(135deg, #e50914 0%, #ff4757 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 48px;
+            background: rgba(10, 11, 15, 0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .logo span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-simple {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .btn-simple:hover {
+            color: white;
+        }
+
+        main {
+            padding: 40px 48px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            margin-bottom: 40px;
+            display: flex;
+            align-items: flex-end;
+            gap: 24px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .user-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .user-info p {
+            color: var(--text-muted);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .poster {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+        }
+
+        .info {
+            padding: 12px;
+        }
+
+        .title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            border: 1px dashed var(--glass-border);
+            color: var(--text-muted);
+        }
+
+        .btn-back {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo" onclick="window.location.href='/'">
+            <span>Cine</span>Vault
+        </div>
+        <div class="user-nav">
+            <button class="btn-simple" onclick="window.location.href='/'">Browse</button>
+            <button class="btn-simple" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-header">
+            <div class="avatar" id="userInitial">U</div>
+            <div class="user-info">
+                <p>Welcome back,</p>
+                <h1 id="userName">User</h1>
+                <p id="userEmail">user@example.com</p>
+            </div>
+        </div>
+
+        <div class="section-title">
+            My Watchlist
+        </div>
+        <div class="grid" id="watchlistGrid">
+            <div class="empty-state">
+                <p>Your watchlist is empty.</p>
+                <a href="/" class="btn-back">Browse Movies</a>
+            </div>
+        </div>
+
+        <div class="section-title">
+            My Reviews
+        </div>
+        <div id="reviewsList">
+            <div class="empty-state">
+                <p>You haven't written any reviews yet.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                window.location.href = '/auth.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            document.getElementById('userName').innerText = user.username;
+            document.getElementById('userEmail').innerText = user.email;
+            document.getElementById('userInitial').innerText = user.username.charAt(0).toUpperCase();
+
+            document.getElementById('logoutBtn').onclick = async () => {
+                try {
+                    await api.auth.logout();
+                } catch (err) { console.error(err); }
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            };
+
+            // Load Watchlist
+            try {
+                const watchlist = await api.user.getWatchlist();
+                const grid = document.getElementById('watchlistGrid');
+
+                if (watchlist.data && watchlist.data.length > 0) {
+                    grid.innerHTML = '';
+                    watchlist.data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <img src="${item.posterPath ? 'https://image.tmdb.org/t/p/w500' + item.posterPath : 'https://via.placeholder.com/300x450'}" class="poster">
+                            <div class="info">
+                                <div class="title">${item.title}</div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+            } catch (err) { console.error('Failed to load watchlist', err); }
+        });
+    </script>
+</body>
+
+</html>

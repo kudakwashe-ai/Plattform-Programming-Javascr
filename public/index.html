@@ -740,10 +740,48 @@
                 </svg>
                 Search
             </button>
+
+            <!-- Auth Buttons -->
+            <div id="authContainer" style="display: flex; gap: 12px;">
+                <button id="loginBtn" class="search-btn" onclick="window.location.href='/auth.html'"
+                    style="background: var(--gradient-primary); color: white;">
+                    Login
+                </button>
+                <div id="userMenu" class="hidden" style="display: none; align-items: center; gap: 12px;">
+                    <button class="search-btn" onclick="goToDashboard()" style="border: 1px solid var(--primary);">
+                        Dashboard
+                    </button>
+                    <button class="search-btn" onclick="logout()" style="background: rgba(255,255,255,0.1);">
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
     <main>
+        <!-- Guest Welcome Section -->
+        <div id="guestHero" class="hidden"
+            style="display: none; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2000'); background-size: cover; background-position: center; padding: 80px 40px; border-radius: 24px; text-align: center; margin-bottom: 48px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg);">
+            <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -2px;">Everything you
+                love. <span style="color: var(--primary);">In one place.</span></h1>
+            <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 32px;">Unlimited
+                movies, TV shows, and more. Watch anywhere. Cancel anytime.</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <button onclick="window.location.href='/auth.html'"
+                    style="padding: 16px 32px; font-size: 1.1rem; background: var(--gradient-primary); border-radius: 12px; color: white; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);">
+                    Get Started
+                    <svg class="icon-svg" style="width: 18px; height: 18px;">
+                        <use href="#icon-play"></use>
+                    </svg>
+                </button>
+                <button onclick="window.location.href='/auth.html'"
+                    style="padding: 16px 32px; font-size: 1.1rem; background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 12px; color: white; font-weight: 700; border: 1px solid var(--glass-border); cursor: pointer;">
+                    Sign In
+                </button>
+            </div>
+        </div>
+
         <h2 class="section-title" id="pageTitle">Trending Now</h2>
         <div class="grid" id="movieGrid"></div>
     </main>
@@ -777,6 +815,7 @@
         </div>
     </div>
 
+    <script src="/js/api.js"></script>
     <script>
         const grid = document.getElementById('movieGrid');
         const searchInput = document.getElementById('searchInput');
@@ -786,9 +825,47 @@
         const videoModal = document.getElementById('videoModal');
         const providerModal = document.getElementById('providerModal');
         const trailerFrame = document.getElementById('trailerFrame');
+        const loginBtn = document.getElementById('loginBtn');
+        const userMenu = document.getElementById('userMenu');
 
         let isFreeMode = false;
 
+        // Check Auth State
+        function checkAuth() {
+            const userStr = localStorage.getItem('user');
+            const guestHero = document.getElementById('guestHero');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                loginBtn.style.display = 'none';
+                userMenu.style.display = 'flex';
+                guestHero.style.display = 'none';
+            } else {
+                loginBtn.style.display = 'block';
+                userMenu.style.display = 'none';
+                guestHero.style.display = 'block';
+            }
+        }
+
+        async function logout() {
+            try {
+                await window.api.auth.logout();
+            } catch (err) {
+                console.error('Logout failed', err);
+            }
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+
+        function goToDashboard() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user.role === 'ADMIN') {
+                window.location.href = '/admin.html';
+            } else {
+                window.location.href = '/dashboard.html';
+            }
+        }
+
+        checkAuth();
         fetchMovies();
 
         searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchMovies() });
@@ -848,26 +925,18 @@
             grid.innerHTML = '<p style="color:white; text-align:center; grid-column:1/-1; display: flex; align-items: center; justify-content: center; gap: 10px;"><span class="loading-spinner"></span> Loading awesome content...</p>';
 
             try {
-                let url = `http://localhost:3000/api/movies/search?`;
-                if (isFreeMode) url += `free=true`;
-
-                if (query) url += `&query=${encodeURIComponent(query)}`;
-                else if (genre) url += `&genre=${genre}`;
-
-                const res = await fetch(url);
-                const response = await res.json();
-                const data = response.data || response;
-
-                if (response.error || response.status === 'fail') {
-                    grid.innerHTML = `
-                        <p style="color:var(--primary); text-align:center; grid-column:1/-1; font-weight:600; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <svg class="icon-svg" style="fill: var(--primary);">
-                                <use href="#icon-alert"></use>
-                            </svg>
-                            ${response.message || response.error || 'Error loading movies'}
-                        </p>
-                    `;
-                    return;
+                let data;
+                if (query) {
+                    const res = await window.api.movies.search(query);
+                    data = res.data || res;
+                } else if (genre) {
+                    // Falls back to search with genre if trending doesn't support it directly in frontend helper
+                    const res = await fetch(`/api/movies/search?genre=${genre}${isFreeMode ? '&free=true' : ''}`);
+                    const response = await res.json();
+                    data = response.data || response;
+                } else {
+                    const res = await window.api.movies.getTrending();
+                    data = res.data || res;
                 }
 
                 if (data.results && data.results.length > 0) {
@@ -953,9 +1022,7 @@
             trailerFrame.src = "";
             videoModal.style.display = "flex";
             try {
-                const res = await fetch(`http://localhost:3000/api/movies/trailer/${id}?type=${type}`);
-                const response = await res.json();
-                const data = response.data || response;
+                const data = await window.api.movies.getTrailer(id, type);
                 if (data.key) trailerFrame.src = `https://www.youtube.com/embed/${data.key}?autoplay=1`;
                 else alert("No trailer available.");
             } catch (err) { alert("Error loading trailer."); }
@@ -970,9 +1037,7 @@
             container.innerHTML = '<p style="display: flex; align-items: center; justify-content: center; gap: 10px;"><span class="loading-spinner"></span> Loading...</p>';
 
             try {
-                const res = await fetch(`http://localhost:3000/api/movies/providers/${id}?type=${type}`);
-                const response = await res.json();
-                const data = response.data || response;
+                const data = await window.api.movies.getProviders(id, type);
 
                 container.innerHTML = '';
 

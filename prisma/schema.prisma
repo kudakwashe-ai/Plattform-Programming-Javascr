@@ -1,0 +1,111 @@
+// Prisma Schema for Movie App
+// Updated for SQLite compatibility
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      String   @default("FREE")
+  
+  firstName String?
+  lastName  String?
+  avatar    String?
+  
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  watchlist Watchlist[]
+  favorites Favorite[]
+  reviews   Review[]
+  ratings   Rating[]
+
+  @@map("users")
+}
+
+model Watchlist {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   Int
+  movieType String   // 'movie' or 'tv'
+  
+  // Cached movie data for faster retrieval
+  title     String
+  posterPath String?
+  overview  String?
+  
+  addedAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, movieId, movieType])
+  @@map("watchlist")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   Int
+  movieType String   // 'movie' or 'tv'
+  
+  // Cached movie data
+  title     String
+  posterPath String?
+  overview  String?
+  
+  addedAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, movieId, movieType])
+  @@map("favorites")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   Int
+  movieType String   // 'movie' or 'tv'
+  
+  content   String
+  
+  // Denormalized for performance
+  movieTitle String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, movieId, movieType])
+  @@map("reviews")
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   Int
+  movieType String   // 'movie' or 'tv'
+  
+  rating    Float    // 0-10 scale to match TMDB
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, movieId, movieType])
+  @@map("ratings")
+}
